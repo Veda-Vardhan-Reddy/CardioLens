@@ -1,0 +1,237 @@
+
+{% extends "heart_app/base.html" %}
+
+{% block title %}CSV Prediction | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .csv-wrap { max-width:1120px; margin:0 auto; }
+    .page-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:25px; }
+    .eyebrow { color:#2563eb; font-size:.76rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:8px; }
+    .page-heading h1 { margin:0; color:#13233f; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-.04em; }
+    .page-heading p { margin:9px 0 0; color:#64748b; max-width:740px; line-height:1.65; }
+    .step-chip { display:inline-flex; align-items:center; gap:8px; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; padding:9px 13px; border-radius:999px; font-size:.82rem; font-weight:750; white-space:nowrap; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,.8fr); gap:22px; align-items:start; }
+    .panel { background:#fff; border:1px solid #e6edf5; border-radius:20px; box-shadow:0 12px 32px rgba(15,23,42,.045); overflow:hidden; }
+    .panel-head { padding:22px 24px; border-bottom:1px solid #edf2f7; display:flex; align-items:center; gap:14px; }
+    .panel-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:#eff6ff; color:#2563eb; font-size:1.25rem; flex-shrink:0; }
+    .panel-head h2 { margin:0; font-size:1.08rem; color:#172554; }
+    .panel-head p { margin:5px 0 0; font-size:.88rem; color:#64748b; line-height:1.5; }
+    .panel-body { padding:24px; }
+    .drop-area { border:1.5px dashed #93c5fd; background:linear-gradient(135deg,#f8fbff,#eff6ff); border-radius:17px; padding:28px 20px; text-align:center; }
+    .upload-icon { width:54px; height:54px; display:grid; place-items:center; border-radius:16px; background:#dbeafe; color:#1d4ed8; font-size:1.6rem; margin:0 auto 14px; }
+    .drop-area h3 { margin:0 0 7px; color:#172554; font-size:1rem; }
+    .drop-area p { margin:0 auto 17px; color:#64748b; font-size:.87rem; line-height:1.55; max-width:430px; }
+    .file-input { display:block; width:100%; max-width:440px; margin:0 auto; padding:11px; border:1px solid #dbe4ef; border-radius:11px; background:#fff; color:#475569; font:inherit; box-sizing:border-box; }
+    .file-input:focus { outline:3px solid rgba(59,130,246,.14); border-color:#60a5fa; }
+    .file-note { color:#64748b; font-size:.8rem; margin-top:11px; }
+    .action-row { display:flex; flex-wrap:wrap; gap:11px; margin-top:22px; }
+    .btn-primary,.btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; padding:12px 17px; font:inherit; font-weight:750; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+    .btn-primary { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; box-shadow:0 7px 16px rgba(37,99,235,.2); }
+    .btn-secondary { background:#fff; border-color:#dbe4ef; color:#334155; }
+    .btn-primary:hover,.btn-secondary:hover { transform:translateY(-1px); }
+    .guide-list { list-style:none; padding:0; margin:0; display:grid; gap:15px; }
+    .guide-list li { display:flex; align-items:flex-start; gap:10px; color:#475569; font-size:.88rem; line-height:1.6; }
+    .guide-dot { width:24px; height:24px; display:grid; place-items:center; flex:0 0 24px; border-radius:8px; background:#eff6ff; color:#2563eb; font-size:.75rem; font-weight:900; }
+    .notice { margin-top:18px; padding:14px 16px; border-radius:12px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; font-size:.87rem; line-height:1.6; }
+    .warning { margin-top:14px; padding:14px 16px; border-radius:12px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:.87rem; line-height:1.6; }
+    .error-box { padding:13px 15px; border-radius:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; margin-bottom:18px; font-size:.9rem; line-height:1.55; }
+    .success-box { padding:13px 15px; border-radius:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; margin-bottom:18px; font-size:.9rem; line-height:1.55; }
+    .template-code { display:block; margin-top:12px; padding:12px 14px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#334155; font-size:.8rem; line-height:1.6; overflow-wrap:anywhere; }
+
+    /* Prediction results */
+    .results-panel { margin-top:26px; }
+    .summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:22px; }
+    .summary-card { padding:17px; border:1px solid #e2e8f0; border-radius:14px; background:#f8fafc; }
+    .summary-card span { display:block; color:#64748b; font-size:.84rem; margin-bottom:8px; }
+    .summary-card strong { color:#172554; font-size:1.65rem; }
+    .results-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+    .results-toolbar h3 { margin:0; color:#172554; font-size:1rem; }
+    .table-scroll { width:100%; overflow:auto; border:1px solid #e2e8f0; border-radius:12px; }
+    .results-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    .results-table th { padding:13px 15px; background:#eff6ff; color:#172554; text-align:left; white-space:nowrap; border-bottom:1px solid #dbe4ef; }
+    .results-table td { padding:12px 15px; color:#334155; border-bottom:1px solid #edf2f7; white-space:nowrap; }
+    .results-table tbody tr:nth-child(even) { background:#f8fafc; }
+    .results-table tbody tr:hover { background:#eff6ff; }
+    .results-table tbody tr:last-child td { border-bottom:none; }
+    .prediction-positive { color:#b91c1c !important; font-weight:750; }
+    .prediction-normal { color:#047857 !important; font-weight:750; }
+    .result-count { color:#64748b; font-size:.84rem; }
+    .results-note { margin-top:17px; }
+    @media(max-width:820px) {
+        .layout { grid-template-columns:1fr; }
+        .panel-head,.panel-body { padding:19px; }
+    }
+    @media(max-width:600px) {
+        .summary-grid { grid-template-columns:1fr; }
+        .action-row>* { width:100%; }
+        .drop-area { padding:22px 15px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="csv-wrap">
+    <header class="page-heading">
+        <div>
+            <div class="eyebrow">Batch inference · CSV upload</div>
+            <h1>Predict from a CSV file</h1>
+            <p>Upload a CSV containing the model's required input features. CardioLens will generate predictions and display the results directly on this page.</p>
+        </div>
+        <div class="step-chip"><span>●</span> Batch prediction</div>
+    </header>
+
+    {% if error %}
+        <div class="error-box" role="alert">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+        <div class="success-box" role="status">{{ message }}</div>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}error-box{% else %}success-box{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="layout">
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">⇧</div>
+                <div>
+                    <h2>Upload prediction dataset</h2>
+                    <p>Select a CSV file to generate predictions for multiple records.</p>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <form method="post" action="{% url 'csv_predict' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="drop-area">
+                        <div class="upload-icon">↥</div>
+                        <h3>Choose your CSV file</h3>
+                        <p>Use a comma-separated file with one row per record and the same feature columns used during training.</p>
+                        <input class="file-input" type="file" name="prediction_file" accept=".csv,text/csv" required>
+                        <div class="file-note">Accepted format: .csv · Maximum size: 25 MB</div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-primary" type="submit">Generate predictions <span aria-hidden="true">→</span></button>
+                        <a class="btn-secondary" href="{% url 'predict' %}">Use manual prediction</a>
+                    </div>
+                </form>
+
+                <div class="notice">
+                    <strong>Expected feature columns:</strong>
+                    <span class="template-code">age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal</span>
+                    Make sure the column names match your model's expected feature names. Do not include a target column unless your view explicitly supports it.
+                </div>
+            </div>
+        </section>
+
+        <aside class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">ⓘ</div>
+                <div>
+                    <h2>Before you upload</h2>
+                    <p>Quick checks for a smoother prediction run.</p>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <ul class="guide-list">
+                    <li><span class="guide-dot">1</span><span>Confirm that the trained model file exists before uploading a test dataset.</span></li>
+                    <li><span class="guide-dot">2</span><span>Use the same feature names, numeric types, and category codes as the training data.</span></li>
+                    <li><span class="guide-dot">3</span><span>Check for missing values and unexpected text in numeric columns.</span></li>
+                    <li><span class="guide-dot">4</span><span>Keep any ground-truth target labels separate from model inputs when evaluating performance.</span></li>
+                </ul>
+
+                <div class="warning">
+                    <strong>Research note:</strong> CSV predictions are model outputs, not clinical diagnoses. Do not use this prototype to make treatment decisions.
+                </div>
+
+                <div class="action-row">
+                    <a class="btn-secondary" href="{% url 'comparison' %}">Model comparison</a>
+                    <a class="btn-secondary" href="{% url 'dashboard' %}">Dashboard</a>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    {% if results %}
+    <section class="panel results-panel" id="prediction-results">
+        <div class="panel-head">
+            <div class="panel-icon">✓</div>
+            <div>
+                <h2>CSV Prediction Results</h2>
+                <p>Predictions generated by your trained model and displayed below.</p>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <span>Total records</span>
+                    <strong>{{ total_records }}</strong>
+                </div>
+                <div class="summary-card">
+                    <span>Heart disease predicted</span>
+                    <strong>{{ disease_count }}</strong>
+                </div>
+                <div class="summary-card">
+                    <span>Normal predicted</span>
+                    <strong>{{ normal_count }}</strong>
+                </div>
+            </div>
+
+            <div class="results-toolbar">
+                <h3>Prediction details</h3>
+                <span class="result-count">Showing {{ total_records }} record(s)</span>
+            </div>
+
+            <div class="table-scroll">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            {% for column in columns %}
+                                <th scope="col">{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                            <tr>
+                                {% for value in row %}
+                                    {% if forloop.parentloop.parentloop.first %}
+                                        <td>{{ value }}</td>
+                                    {% else %}
+                                        <td>{{ value }}</td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning results-note">
+                <strong>Research note:</strong>
+                Predictions are outputs of a machine-learning model, not confirmed diagnoses. The model probability, when shown, is not necessarily a clinically calibrated risk estimate.
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+{% if results %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const results = document.getElementById("prediction-results");
+        if (results) {
+            results.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

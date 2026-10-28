@@ -1,0 +1,220 @@
+{% extends "heart_app/base.html" %}
+
+{% block title %}Model Comparison | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .compare-wrap { max-width:1200px; margin:0 auto; }
+    .page-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:25px; }
+    .eyebrow { color:#2563eb; font-size:.76rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:8px; }
+    .page-heading h1 { margin:0; color:#13233f; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-.04em; }
+    .page-heading p { margin:9px 0 0; color:#64748b; max-width:760px; line-height:1.65; }
+    .result-chip { display:inline-flex; align-items:center; gap:8px; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; padding:9px 13px; border-radius:999px; font-size:.82rem; font-weight:750; white-space:nowrap; }
+    .panel { background:#fff; border:1px solid #e6edf5; border-radius:20px; box-shadow:0 12px 32px rgba(15,23,42,.045); overflow:hidden; }
+    .panel-head { padding:22px 24px; border-bottom:1px solid #edf2f7; display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap; }
+    .panel-head h2 { margin:0; color:#172554; font-size:1.08rem; }
+    .panel-head p { margin:5px 0 0; color:#64748b; font-size:.88rem; line-height:1.5; }
+    .panel-body { padding:24px; }
+    .results-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; margin-bottom:22px; }
+    .summary-card { padding:17px 18px; background:linear-gradient(135deg,#f8fbff,#fff); border:1px solid #e5edf7; border-radius:15px; }
+    .summary-card span { display:block; color:#64748b; font-size:.8rem; margin-bottom:7px; }
+    .summary-card strong { display:block; color:#172554; font-size:1.15rem; }
+    .summary-card small { display:block; color:#64748b; font-size:.78rem; margin-top:5px; }
+    .table-scroll { overflow-x:auto; border:1px solid #e5edf5; border-radius:14px; }
+    table { width:100%; border-collapse:separate; border-spacing:0; min-width:1150px; font-size:.86rem; }
+    thead th { background:#f3f7fc; color:#475569; font-size:.76rem; font-weight:800; text-align:left; padding:14px 13px; white-space:nowrap; border-bottom:1px solid #e2e8f0; }
+    tbody td { padding:14px 13px; color:#334155; border-bottom:1px solid #edf2f7; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    tbody tr:last-child td { border-bottom:0; }
+    tbody tr:hover td { background:#f8fbff; }
+    tbody td:first-child { color:#172554; font-weight:750; white-space:normal; min-width:180px; }
+    .empty-state { text-align:center; padding:42px 24px; }
+    .empty-icon { width:58px; height:58px; display:grid; place-items:center; margin:0 auto 16px; border-radius:18px; background:#eff6ff; color:#2563eb; font-size:1.65rem; }
+    .empty-state h2 { margin:0 0 9px; color:#172554; font-size:1.25rem; }
+    .empty-state p { color:#64748b; line-height:1.65; max-width:580px; margin:0 auto; }
+    .action-row { display:flex; flex-wrap:wrap; gap:11px; margin-top:22px; }
+    .btn-primary,.btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; padding:12px 17px; font:inherit; font-weight:750; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+    .btn-primary { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; box-shadow:0 7px 16px rgba(37,99,235,.2); }
+    .btn-secondary { background:#fff; border-color:#dbe4ef; color:#334155; }
+    .btn-primary:hover,.btn-secondary:hover { transform:translateY(-1px); }
+    .notice { margin-top:19px; padding:14px 16px; border-radius:12px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; font-size:.87rem; line-height:1.6; }
+    .warning { margin-top:13px; padding:14px 16px; border-radius:12px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:.87rem; line-height:1.6; }
+    .metric-guide { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; margin-top:20px; }
+    .guide-item { padding:15px; border:1px solid #e8eef6; border-radius:13px; }
+    .guide-item strong { display:block; color:#1e293b; font-size:.88rem; margin-bottom:5px; }
+    .guide-item span { display:block; color:#64748b; font-size:.82rem; line-height:1.5; }
+    @media(max-width:700px){.panel-head,.panel-body{padding:19px}.results-summary{grid-template-columns:1fr}.metric-guide{grid-template-columns:1fr}.action-row>*{width:100%}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="compare-wrap">
+    <header class="page-heading">
+        <div>
+            <div class="eyebrow">Experimental results · Evaluation</div>
+            <h1>Model comparison</h1>
+            <p>Compare cross-validation and held-out test metrics from your saved experiment. Values are read from reports/model_comparison.csv.</p>
+        </div>
+        <div class="result-chip"><span>●</span> Training report</div>
+    </header>
+
+    {% if error %}
+        <div class="warning" role="alert">
+            <strong>Could not load the model report:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    {% if rows %}
+        <div class="results-summary">
+            <div class="summary-card">
+                <span>Models evaluated</span>
+                <strong>{{ rows|length }}</strong>
+                <small>Rows in the current report</small>
+            </div>
+            <div class="summary-card">
+                <span>Report status</span>
+                <strong>Available</strong>
+                <small>Metrics loaded from the CSV report</small>
+            </div>
+            <div class="summary-card">
+                <span>Metrics shown</span>
+                <strong>4 test metrics</strong>
+                <small>Held-out test-set results</small>
+            </div>
+        </div>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Evaluation results</h2>
+                    <p>Scroll horizontally to view every metric on smaller screens.</p>
+                </div>
+                <a class="btn-secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+            </div>
+            <div class="panel-body">
+                <div class="table-scroll">
+                    <table style="min-width:700px;">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>F-score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in rows %}
+                            <tr>
+                                <td>{{ r.model|default:"Unknown model" }}</td>
+                                <td>{% if r.test_accuracy != None and r.test_accuracy != "" %}{{ r.test_accuracy|floatformat:4 }}{% else %}N/A{% endif %}</td>
+                                <td>{% if r.precision != None and r.precision != "" %}{{ r.precision|floatformat:4 }}{% else %}N/A{% endif %}</td>
+                                <td>{% if r.sensitivity != None and r.sensitivity != "" %}{{ r.sensitivity|floatformat:4 }}{% else %}N/A{% endif %}</td>
+                                <td>{% if r.f1 != None and r.f1 != "" %}{{ r.f1|floatformat:4 }}{% else %}N/A{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notice">
+                    <strong>How to read the table:</strong> Accuracy, precision, recall (sensitivity), and F-score are read from the held-out test results. Compare several metrics together rather than relying on accuracy alone.
+                </div>
+                <div class="warning">
+                    <strong>Research caution:</strong> The original dataset contains many duplicate records, which may inflate performance if related records occur in both training and validation/test partitions. Disclose this limitation and validate on appropriately separated data. This application is for research and education, not medical diagnosis.
+                </div>
+
+                <!-- Model comparison graph: inserted below the evaluation table and research caution -->
+                <section class="panel" style="margin-top:22px; box-shadow:none;">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Model Performance Graph</h2>
+                            <p>Compare held-out test accuracy, sensitivity, specificity, and ROC-AUC.</p>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div style="position:relative; width:100%; height:420px;">
+                            <canvas id="modelComparisonChart" aria-label="Model performance comparison chart" role="img"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    {% else %}
+        <section class="panel">
+            <div class="empty-state">
+                <div class="empty-icon">▥</div>
+                <h2>No model report yet</h2>
+                <p>The comparison report has not been supplied to this page. Confirm that reports/model_comparison.csv exists and contains the evaluated model rows.</p>
+                <div class="action-row" style="justify-content:center;">
+                    <a class="btn-primary" href="{% url 'dashboard' %}">Back to dashboard</a>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="panel" style="margin-top:22px;">
+        <div class="panel-head">
+            <div>
+                <h2>Metric guide</h2>
+                <p>Quick definitions for the values shown in the report.</p>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="metric-guide">
+                <div class="guide-item"><strong>Accuracy</strong><span>Proportion of all held-out test predictions that match the true labels.</span></div>
+                <div class="guide-item"><strong>Precision</strong><span>Among predicted positive cases, the proportion that are truly positive.</span></div>
+                <div class="guide-item"><strong>Recall (Sensitivity)</strong><span>Among actual positive cases, the proportion correctly identified.</span></div>
+                <div class="guide-item"><strong>F-score (F1)</strong><span>Harmonic mean of precision and recall.</span></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% if rows %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const canvas = document.getElementById("modelComparisonChart");
+    if (!canvas) return;
+
+    const labels = {{ chart_labels|safe }};
+    const accuracy = {{ chart_accuracy|safe }};
+    const sensitivity = {{ chart_sensitivity|safe }};
+    const specificity = {{ chart_specificity|safe }};
+    const auc = {{ chart_auc|safe }};
+
+    new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                { label: "Accuracy (%)", data: accuracy },
+                { label: "Sensitivity (%)", data: sensitivity },
+                { label: "Specificity (%)", data: specificity },
+                { label: "ROC-AUC (%)", data: auc }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: "Score (%)" }
+                },
+                x: {
+                    ticks: { autoSkip: false, maxRotation: 45, minRotation: 25 }
+                }
+            },
+            plugins: {
+                legend: { position: "bottom" },
+                tooltip: { enabled: true }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

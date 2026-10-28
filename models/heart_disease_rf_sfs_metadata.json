@@ -1,0 +1,26 @@
+
+{
+    "model_name": "Random Forest + Sequential Feature Selection",
+    "target_column": "target",
+    "original_target_column": "num",
+    "binary_target_rule": "num > 0",
+    "input_features": [
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal"
+    ],
+    "selected_features": [],
+    "n_features_selected": 6,
+    "test_size": 0.2,
+    "random_state": 42
+}

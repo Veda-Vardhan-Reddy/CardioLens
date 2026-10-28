@@ -1,0 +1,156 @@
+{% extends "heart_app/base.html" %}
+
+{% block title %}About & Methodology | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .about-wrap { max-width:1120px; margin:0 auto; }
+    .page-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:25px; }
+    .eyebrow { color:#2563eb; font-size:.76rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:8px; }
+    .page-heading h1 { margin:0; color:#13233f; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-.04em; }
+    .page-heading p { margin:9px 0 0; color:#64748b; max-width:760px; line-height:1.65; }
+    .hero-card { padding:26px; border-radius:20px; background:linear-gradient(135deg,#eff6ff 0%,#f8fbff 65%,#ecfeff 100%); border:1px solid #dbeafe; margin-bottom:22px; }
+    .hero-card h2 { margin:0 0 10px; color:#172554; font-size:1.35rem; }
+    .hero-card p { margin:0; color:#52637c; line-height:1.7; max-width:900px; }
+    .section-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+    .panel { background:#fff; border:1px solid #e6edf5; border-radius:20px; box-shadow:0 12px 32px rgba(15,23,42,.045); overflow:hidden; }
+    .panel-head { padding:21px 23px; border-bottom:1px solid #edf2f7; display:flex; align-items:center; gap:13px; }
+    .panel-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; background:#eff6ff; color:#2563eb; font-size:1.2rem; flex-shrink:0; }
+    .panel-head h2 { margin:0; color:#172554; font-size:1.04rem; }
+    .panel-head p { margin:5px 0 0; color:#64748b; font-size:.86rem; line-height:1.5; }
+    .panel-body { padding:23px; }
+    .panel-body p { color:#475569; line-height:1.7; font-size:.91rem; margin:0 0 13px; }
+    .panel-body p:last-child { margin-bottom:0; }
+    .panel-body h3 { color:#1e293b; font-size:.95rem; margin:20px 0 8px; }
+    .panel-body ul { margin:9px 0 0; padding-left:21px; color:#475569; }
+    .panel-body li { margin:0 0 10px; padding-left:3px; line-height:1.6; font-size:.9rem; }
+    .paper-title { padding:15px 16px; border:1px solid #dbeafe; background:#f8fbff; color:#1e3a8a; border-radius:13px; line-height:1.65; font-size:.9rem; margin-bottom:15px; }
+    .pill-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .pill { display:inline-flex; padding:7px 10px; border-radius:999px; background:#eff6ff; border:1px solid #dbeafe; color:#1d4ed8; font-size:.78rem; font-weight:750; }
+    .steps { display:grid; gap:13px; }
+    .step { display:flex; gap:12px; align-items:flex-start; }
+    .step-number { flex:0 0 30px; height:30px; display:grid; place-items:center; border-radius:10px; background:#eff6ff; color:#1d4ed8; font-weight:800; font-size:.82rem; }
+    .step strong { display:block; color:#1e293b; font-size:.9rem; margin:1px 0 4px; }
+    .step span { display:block; color:#64748b; font-size:.84rem; line-height:1.55; }
+    .source-link { color:#1d4ed8; text-decoration:underline; overflow-wrap:anywhere; }
+    .notice { margin-top:20px; padding:15px 17px; border-radius:13px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:.88rem; line-height:1.65; }
+    .footer-actions { display:flex; flex-wrap:wrap; gap:11px; margin-top:22px; }
+    .btn-primary,.btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; padding:12px 17px; font:inherit; font-weight:750; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+    .btn-primary { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; box-shadow:0 7px 16px rgba(37,99,235,.2); }
+    .btn-secondary { background:#fff; border-color:#dbe4ef; color:#334155; }
+    .btn-primary:hover,.btn-secondary:hover { transform:translateY(-1px); }
+    @media(max-width:760px){.section-grid{grid-template-columns:1fr}.panel-head,.panel-body{padding:19px}.hero-card{padding:21px}}
+    @media(max-width:480px){.footer-actions>*{width:100%}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-wrap">
+    <header class="page-heading">
+        <div>
+            <div class="eyebrow">Project information · Research design</div>
+            <h1>About CardioLens</h1>
+            <p>Explore the research background, proposed extension, dataset sources, workflow, and limitations of this educational heart-disease machine-learning prototype.</p>
+        </div>
+    </header>
+
+    <section class="hero-card">
+        <div class="eyebrow">Research overview</div>
+        <h2>Existing system and proposed extension</h2>
+        <p>CardioLens compares multiple machine-learning approaches for a binary heart-disease prediction task. It provides a Django interface for dataset preparation, model training, evaluation, and demonstration predictions. Reported metrics should come from the local experiment rather than assumed benchmark values.</p>
+    </section>
+
+    <div class="section-grid">
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">▤</div>
+                <div>
+                    <h2>Existing system — base paper</h2>
+                    <p>Research foundation supplied with this project</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="paper-title">
+                    Ahmad et al., “Comparative Study of Optimum Medical Diagnosis of Human Heart Disease Using Machine Learning Technique With and Without Sequential Feature Selection,” <em>IEEE Access</em> (2022).
+                </div>
+                <p><strong>DOI:</strong> <a class="source-link" href="https://doi.org/10.1109/ACCESS.2022.3153047" target="_blank" rel="noopener noreferrer">10.1109/ACCESS.2022.3153047</a></p>
+                <p>The supplied project notes describe a comparison of LDA, Random Forest, Gradient Boosting, Decision Tree, SVM, and KNN. The study uses Sequential Feature Selection (SFS), five-fold cross-validation, and evaluation measures including accuracy, sensitivity, specificity, F1, and ROC-AUC.</p>
+                <div class="pill-row">
+                    <span class="pill">Machine learning</span>
+                    <span class="pill">Sequential feature selection</span>
+                    <span class="pill">5-fold CV</span>
+                </div>
+                <div class="notice">Accuracy values reported in the paper belong to its particular dataset variants and evaluation protocol. They should not be copied as results for this implementation.</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">✦</div>
+                <div>
+                    <h2>Proposed extension</h2>
+                    <p>Methods implemented in this project pipeline</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <ul>
+                    <li>Compare eight model approaches, including Logistic Regression and Random Forest with forward Sequential Feature Selection.</li>
+                    <li>Use a stratified 80/20 holdout and stratified five-fold cross-validation on the training portion.</li>
+                    <li>Report accuracy, balanced accuracy, precision, sensitivity, specificity, F1, ROC-AUC, and confusion counts where generated by the pipeline.</li>
+                    <li>Use preprocessing pipelines and perform feature selection inside cross-validation folds to reduce data leakage.</li>
+                    <li>Save the trained model and comparison CSV to support reproducible inference.</li>
+                </ul>
+                <div class="pill-row">
+                    <span class="pill">8 model approaches</span>
+                    <span class="pill">Evaluation dashboard</span>
+                    <span class="pill">Saved inference model</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">▦</div>
+                <div>
+                    <h2>Dataset and features</h2>
+                    <p>Expected input data for model training</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <p>The project pipeline uses a public CSV mirror when available, or the local file <code>data/heart.csv</code>.</p>
+                <p><strong>CSV mirror:</strong><br><a class="source-link" href="https://raw.githubusercontent.com/plotly/datasets/master/heart.csv" target="_blank" rel="noopener noreferrer">Plotly datasets — heart.csv</a></p>
+                <p><strong>Official dataset information:</strong><br><a class="source-link" href="https://archive.ics.uci.edu/dataset/45/heart+disease" target="_blank" rel="noopener noreferrer">UCI Heart Disease dataset</a></p>
+                <h3>Expected feature columns</h3>
+                <p><code>age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal</code></p>
+                <p>The target field may be named <code>target</code> or <code>num</code> depending on the source. Confirm the actual CSV headers before training.</p>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">⇢</div>
+                <div>
+                    <h2>Application workflow</h2>
+                    <p>Typical sequence for running an experiment</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="steps">
+                    <div class="step"><div class="step-number">1</div><div><strong>Upload dataset</strong><span>Choose a compatible CSV file and check its required columns.</span></div></div>
+                    <div class="step"><div class="step-number">2</div><div><strong>Preprocess and split</strong><span>Validate records and create training and testing subsets.</span></div></div>
+                    <div class="step"><div class="step-number">3</div><div><strong>Train and evaluate</strong><span>Fit the configured models and save the generated comparison report.</span></div></div>
+                    <div class="step"><div class="step-number">4</div><div><strong>Review predictions</strong><span>Explore manual or CSV predictions alongside the evaluation metrics.</span></div></div>
+                </div>
+                <div class="footer-actions">
+                    <a class="btn-primary" href="{% url 'dashboard' %}">Open dashboard</a>
+                    <a class="btn-secondary" href="{% url 'comparison' %}">View model comparison</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="notice">
+        <strong>Limitations and responsible use:</strong> CardioLens is an educational research prototype, not a validated medical device. Small or historical datasets can produce optimistic estimates, especially when duplicate records or data leakage are present. External validation and appropriate clinical governance would be required before any real-world medical use. Do not use its output to make diagnosis or treatment decisions.
+    </div>
+</div>
+{% endblock %}

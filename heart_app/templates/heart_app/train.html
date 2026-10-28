@@ -1,0 +1,253 @@
+
+{% extends "heart_app/base.html" %}
+
+{% block title %}Train Models | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .train-wrap { max-width:1120px; margin:0 auto; }
+    .page-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:26px; }
+    .eyebrow { color:#2563eb; font-size:.76rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:8px; }
+    .page-heading h1 { margin:0; color:#13233f; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-.04em; }
+    .page-heading p { margin:9px 0 0; color:#64748b; max-width:720px; line-height:1.65; }
+    .step-chip { display:inline-flex; align-items:center; gap:8px; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; padding:9px 13px; border-radius:999px; font-size:.82rem; font-weight:750; }
+    .panel { background:#fff; border:1px solid #e6edf5; border-radius:20px; box-shadow:0 12px 32px rgba(15,23,42,.045); overflow:hidden; margin-bottom:22px; }
+    .panel-head { padding:22px 24px; border-bottom:1px solid #edf2f7; display:flex; align-items:center; gap:14px; }
+    .panel-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:#eff6ff; color:#2563eb; font-size:1.25rem; flex-shrink:0; }
+    .panel-head h2 { margin:0; font-size:1.08rem; color:#172554; }
+    .panel-head p { margin:5px 0 0; font-size:.88rem; color:#64748b; line-height:1.5; }
+    .panel-body { padding:24px; }
+    .hero-card { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr); gap:20px; padding:25px; border-radius:18px; background:linear-gradient(135deg,#eff6ff 0%,#f8fbff 65%,#ecfeff 100%); border:1px solid #dbeafe; margin-bottom:22px; }
+    .hero-card h2 { margin:0 0 9px; color:#172554; font-size:1.25rem; }
+    .hero-card p { margin:0; color:#52637c; line-height:1.65; font-size:.92rem; }
+    .hero-stat { align-self:center; padding:18px; border-radius:15px; background:rgba(255,255,255,.8); border:1px solid #dbeafe; }
+    .hero-stat span { display:block; font-size:.8rem; color:#64748b; margin-bottom:7px; }
+    .hero-stat strong { display:block; color:#1d4ed8; font-size:1.3rem; }
+    .model-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+    .model-card { border:1px solid #e7edf5; border-radius:15px; padding:16px; background:#fff; min-height:112px; }
+    .model-symbol { width:34px; height:34px; display:grid; place-items:center; background:#eff6ff; color:#2563eb; border-radius:10px; font-weight:900; margin-bottom:12px; }
+    .model-card strong { display:block; color:#1e293b; font-size:.9rem; line-height:1.4; }
+    .model-card span { display:block; margin-top:5px; color:#64748b; font-size:.78rem; line-height:1.45; }
+    .action-row { display:flex; flex-wrap:wrap; gap:11px; margin-top:22px; }
+    .btn-primary,.btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; padding:12px 17px; font:inherit; font-weight:750; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+    .btn-primary { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; box-shadow:0 7px 16px rgba(37,99,235,.2); }
+    .btn-secondary { background:#fff; border-color:#dbe4ef; color:#334155; }
+    .btn-primary:hover,.btn-secondary:hover { transform:translateY(-1px); }
+    .notice { margin-top:18px; padding:14px 16px; border-radius:12px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; font-size:.87rem; line-height:1.55; }
+    .warning { margin-top:14px; padding:14px 16px; border-radius:12px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:.87rem; line-height:1.55; }
+    .status { padding:13px 15px; border-radius:12px; margin-bottom:16px; font-size:.9rem; line-height:1.5; }
+    .status-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+    .status-error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+    .status-info { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+    .workflow { display:grid; gap:14px; }
+    .workflow-step { display:flex; gap:12px; align-items:flex-start; }
+    .step-num { flex:0 0 30px; height:30px; display:grid; place-items:center; border-radius:10px; background:#eff6ff; color:#1d4ed8; font-weight:800; font-size:.82rem; }
+    .workflow-step strong { display:block; color:#1e293b; font-size:.9rem; margin:1px 0 3px; }
+    .workflow-step span { display:block; color:#64748b; font-size:.83rem; line-height:1.5; }
+    .table-wrap { overflow-x:auto; }
+    .metrics-table { width:100%; border-collapse:collapse; min-width:700px; }
+    .metrics-table th,.metrics-table td { padding:14px 16px; text-align:left; border-bottom:1px solid #edf2f7; white-space:nowrap; }
+    .metrics-table th { background:#f8fafc; color:#475569; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+    .metrics-table td { color:#334155; font-size:.88rem; }
+    .metrics-table tr:last-child td { border-bottom:0; }
+    .metric-value { font-weight:800; color:#1d4ed8 !important; font-variant-numeric:tabular-nums; }
+    .empty-state { padding:22px; border:1px dashed #cbd5e1; border-radius:13px; color:#64748b; line-height:1.6; }
+    .progress-track { height:8px; background:#dbeafe; border-radius:999px; overflow:hidden; margin-top:13px; }
+    .progress-fill { width:100%; height:100%; background:linear-gradient(90deg,#2563eb,#14b8a6); border-radius:999px; }
+    .training-button:disabled { opacity:.65; cursor:wait; transform:none; }
+    @media(max-width:900px) { .model-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .hero-card { grid-template-columns:1fr; } }
+    @media(max-width:650px) { .panel-head { padding:19px; } .panel-body { padding:19px; } .model-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:440px) { .model-grid { grid-template-columns:1fr; } .action-row>* { width:100%; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="train-wrap">
+
+    <header class="page-heading">
+        <div>
+            <div class="eyebrow">Machine learning · Step 04</div>
+            <h1>Train your models</h1>
+            <p>Train and evaluate the configured heart-disease algorithms. Review their actual metrics here, then open Evaluation &amp; Graphs to compare their performance.</p>
+        </div>
+        <div class="step-chip">● Model training workspace</div>
+    </header>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="status {% if 'error' in message.tags %}status-error{% else %}status-success{% endif %}" role="status">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if error %}
+        <div class="status status-error" role="alert">
+            <strong>Training failed:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    {% if trained %}
+        <div class="status status-success" role="status">
+            <strong>✓ Model training completed successfully.</strong>
+            The evaluation results below were loaded from the project's saved model-comparison report.
+        </div>
+    {% endif %}
+
+    <section class="hero-card">
+        <div>
+            <div class="eyebrow">Training pipeline</div>
+            <h2>Build, evaluate, and compare predictive models</h2>
+            <p>Start training after uploading, preprocessing, and splitting the dataset. When training finishes, this page displays the recorded evaluation metrics.</p>
+        </div>
+        <div class="hero-stat">
+            <span>Configured algorithms</span>
+            <strong>8 model approaches</strong>
+            <div class="progress-track" aria-label="Workflow indicator">
+                <div class="progress-fill"></div>
+            </div>
+            <span style="margin:8px 0 0;">Results appear below after training</span>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div class="panel-icon">⚙</div>
+            <div>
+                <h2>Algorithms in this project</h2>
+                <p>Model approaches configured in the machine-learning pipeline.</p>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="model-grid">
+                <div class="model-card"><div class="model-symbol">LR</div><strong>Logistic Regression</strong><span>Baseline linear classifier</span></div>
+                <div class="model-card"><div class="model-symbol">RF</div><strong>Random Forest</strong><span>Tree-based ensemble</span></div>
+                <div class="model-card"><div class="model-symbol">GB</div><strong>Gradient Boosting</strong><span>Boosting-based classifier</span></div>
+                <div class="model-card"><div class="model-symbol">SVM</div><strong>Support Vector Machine</strong><span>RBF-kernel classifier</span></div>
+                <div class="model-card"><div class="model-symbol">KNN</div><strong>K-Nearest Neighbors</strong><span>Distance-based classifier</span></div>
+                <div class="model-card"><div class="model-symbol">DT</div><strong>Decision Tree</strong><span>Rule-based tree model</span></div>
+                <div class="model-card"><div class="model-symbol">LDA</div><strong>Linear Discriminant Analysis</strong><span>Linear classification</span></div>
+                <div class="model-card"><div class="model-symbol">SFS</div><strong>RF + Sequential Feature Selection</strong><span>Feature-selection-based model</span></div>
+            </div>
+
+            <form method="post" action="{% url 'train_models' %}" id="train-form">
+                {% csrf_token %}
+                <div class="action-row">
+                    <button class="btn-primary training-button" id="train-button" type="submit">
+                        Start model training <span aria-hidden="true">→</span>
+                    </button>
+                    <a class="btn-secondary" href="{% url 'split_dataset' %}">Back to dataset split</a>
+                </div>
+            </form>
+
+            <div class="notice">
+                <strong>Next:</strong> after training, use the Evaluation &amp; Graphs page to view the model comparison chart. The chart should use the metrics recorded by the pipeline.
+            </div>
+
+            <div class="warning">
+                <strong>Research caution:</strong> duplicate or overlapping records can inflate evaluation scores. Report the dataset, split strategy, and evaluation method, and consider a duplicate-aware evaluation.
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" id="training-results">
+        <div class="panel-head">
+            <div class="panel-icon">▦</div>
+            <div>
+                <h2>Training evaluation results</h2>
+                <p>Accuracy, precision, recall, and F-score from the saved comparison report.</p>
+            </div>
+        </div>
+        <div class="panel-body">
+
+            {% if rows %}
+                <div class="table-wrap">
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>F-score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                                <tr>
+                                    <td>
+                                        {{ row.model|default:"Model" }}
+                                    </td>
+                                    <td class="metric-value">
+                                        {{ row.test_accuracy|floatformat:4 }}
+                                    </td>
+                                    <td class="metric-value">
+                                        {{ row.precision|floatformat:4 }}
+                                    </td>
+                                    <td class="metric-value">
+                                        {{ row.recall|floatformat:4 }}
+                                    </td>
+                                    <td class="metric-value">
+                                        {{ row.f1|floatformat:4 }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    No model-comparison results are available yet. Start model training to generate the evaluation report. Results will appear here when the training pipeline finishes successfully.
+                </div>
+            {% endif %}
+
+            <div class="action-row">
+                <a class="btn-primary" href="{% url 'comparison' %}">View model comparison graphs</a>
+                <a class="btn-secondary" href="{% url 'predict' %}">Open manual prediction</a>
+                <a class="btn-secondary" href="{% url 'dashboard' %}">Dashboard</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div class="panel-icon">➜</div>
+            <div>
+                <h2>Next steps</h2>
+                <p>Continue through the CardioLens workflow.</p>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="workflow">
+                <div class="workflow-step">
+                    <div class="step-num">1</div>
+                    <div><strong>Run training</strong><span>Submit the training form and wait for evaluation to finish.</span></div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">2</div>
+                    <div><strong>Compare the algorithms</strong><span>Review Accuracy, Precision, Recall, and F-score on the comparison page.</span></div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">3</div>
+                    <div><strong>Test predictions</strong><span>Use manual or CSV prediction with the saved model.</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+(function () {
+    const form = document.getElementById("train-form");
+    const button = document.getElementById("train-button");
+
+    if (form && button) {
+        form.addEventListener("submit", function () {
+            button.disabled = true;
+            button.textContent = "Training models… please wait";
+        });
+    }
+})();
+</script>
+{% endblock %}

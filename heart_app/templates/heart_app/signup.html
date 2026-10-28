@@ -1,0 +1,330 @@
+{% extends "heart_app/base.html" %}
+
+{% block title %}Create Account | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .signup-page {
+        min-height: 70vh;
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+        align-items: stretch;
+        max-width: 1080px;
+        margin: 12px auto;
+        background: #fff;
+        border: 1px solid #e4eaf1;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 55px rgba(20, 43, 77, .09);
+    }
+    .signup-intro {
+        position: relative;
+        padding: 48px 42px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 15% 15%, rgba(77, 174, 232, .32), transparent 34%),
+            linear-gradient(145deg, #102b49 0%, #145b91 60%, #197bb5 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 36px;
+    }
+    .intro-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        padding: 7px 11px;
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 999px;
+        background: rgba(255,255,255,.09);
+        color: #e2f3ff;
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .intro-heart {
+        font-size: 56px;
+        line-height: 1;
+        margin: 28px 0 20px;
+        text-shadow: 0 8px 28px rgba(0,0,0,.2);
+    }
+    .signup-intro h1 {
+        max-width: 440px;
+        margin: 0;
+        font-size: clamp(30px, 4vw, 43px);
+        line-height: 1.12;
+        letter-spacing: -1.5px;
+        color: #fff;
+    }
+    .signup-intro .intro-copy {
+        max-width: 430px;
+        margin: 18px 0 0;
+        color: #d4e7f6;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+    .intro-points {
+        display: grid;
+        gap: 15px;
+        margin-top: 28px;
+    }
+    .intro-point {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #edf7ff;
+        font-size: 13px;
+    }
+    .point-check {
+        display: grid;
+        place-items: center;
+        flex: 0 0 24px;
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        background: rgba(255,255,255,.14);
+        color: #bde8ff;
+        font-weight: 800;
+    }
+    .intro-note {
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,.2);
+        color: #c3d9eb;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+    .signup-form-panel {
+        padding: 42px clamp(24px, 4vw, 48px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .form-eyebrow {
+        margin: 0 0 8px;
+        color: #1769aa;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.3px;
+    }
+    .signup-form-panel h2 {
+        margin: 0;
+        color: #172b4d;
+        font-size: 29px;
+        line-height: 1.2;
+        letter-spacing: -.7px;
+    }
+    .form-subtitle {
+        margin: 10px 0 24px;
+        color: #65758b;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+    .signup-form .field-row {
+        margin-bottom: 16px;
+    }
+    .signup-form label {
+        display: block;
+        margin-bottom: 7px;
+        color: #34445a;
+        font-size: 12px;
+        font-weight: 750;
+    }
+    .signup-form input {
+        display: block;
+        width: 100%;
+        min-height: 45px;
+        padding: 11px 13px;
+        border: 1px solid #d8e1eb;
+        border-radius: 10px;
+        background: #fbfcfe;
+        color: #172b4d;
+        font: inherit;
+        font-size: 13px;
+        transition: border-color .18s, box-shadow .18s, background .18s;
+    }
+    .signup-form input:focus {
+        outline: none;
+        border-color: #398bc4;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(23,105,170,.12);
+    }
+    .signup-form .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #7a899b;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+    .signup-form .helptext ul {
+        margin: 6px 0 0;
+        padding-left: 18px;
+    }
+    .signup-form .errorlist,
+    .form-errors {
+        margin: 7px 0 0;
+        padding-left: 17px;
+        color: #b42318;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+    .signup-alert {
+        margin-bottom: 16px;
+        padding: 11px 13px;
+        border: 1px solid #f2c7c3;
+        border-radius: 10px;
+        background: #fff5f4;
+        color: #a1261d;
+        font-size: 12px;
+    }
+    .signup-submit {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 47px;
+        margin-top: 8px;
+        border: 0;
+        border-radius: 11px;
+        background: linear-gradient(100deg, #1769aa, #125487);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(23,105,170,.2);
+        transition: transform .18s, box-shadow .18s;
+    }
+    .signup-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 11px 23px rgba(23,105,170,.25);
+    }
+    .signup-login {
+        margin: 20px 0 0;
+        text-align: center;
+        color: #65758b;
+        font-size: 12px;
+    }
+    .signup-login a {
+        color: #1769aa;
+        font-weight: 800;
+        text-decoration: none;
+    }
+    .signup-login a:hover { text-decoration: underline; }
+    .signup-privacy {
+        margin-top: 22px;
+        padding-top: 15px;
+        border-top: 1px solid #edf0f5;
+        color: #8793a3;
+        text-align: center;
+        font-size: 10px;
+        line-height: 1.65;
+    }
+    @media (max-width: 800px) {
+        .signup-page {
+            grid-template-columns: 1fr;
+            max-width: 560px;
+        }
+        .signup-intro { padding: 30px; gap: 24px; }
+        .intro-heart { font-size: 42px; margin: 18px 0 14px; }
+        .signup-intro h1 { font-size: 32px; }
+        .intro-points { grid-template-columns: 1fr; }
+        .intro-note { padding-top: 14px; }
+        .signup-form-panel { padding: 32px 26px; }
+    }
+    @media (max-width: 480px) {
+        .signup-page { margin: 0; border-radius: 16px; }
+        .signup-intro { padding: 25px 22px; }
+        .signup-form-panel { padding: 28px 22px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="signup-page">
+    <aside class="signup-intro">
+        <div>
+            <span class="intro-kicker">♥ &nbsp; CardioLens Platform</span>
+            <div class="intro-heart" aria-hidden="true">♥</div>
+            <h1>Research smarter. Understand your data.</h1>
+            <p class="intro-copy">
+                Create your account to access the heart disease research
+                workspace, compare machine-learning models, and explore
+                prediction tools in one place.
+            </p>
+
+            <div class="intro-points">
+                <div class="intro-point">
+                    <span class="point-check">✓</span>
+                    <span><strong>Structured workflow</strong><br>Upload, preprocess, split and train datasets.</span>
+                </div>
+                <div class="intro-point">
+                    <span class="point-check">✓</span>
+                    <span><strong>Model evaluation</strong><br>Review comparison metrics and performance graphs.</span>
+                </div>
+                <div class="intro-point">
+                    <span class="point-check">✓</span>
+                    <span><strong>Two prediction modes</strong><br>Enter one record or upload a CSV file.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="intro-note">
+            Educational research prototype only. Predictions are not medical
+            diagnoses and must not replace professional healthcare advice.
+        </div>
+    </aside>
+
+    <div class="signup-form-panel">
+        <p class="form-eyebrow">Get started</p>
+        <h2>Create your account</h2>
+        <p class="form-subtitle">
+            Fill in the details below to access your CardioLens workspace.
+        </p>
+
+        {% if form.non_field_errors %}
+            <div class="signup-alert" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post" class="signup-form" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="field-row">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <div class="helptext">{{ field.help_text|safe }}</div>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="signup-submit">
+                Create Account &nbsp; →
+            </button>
+        </form>
+
+        <p class="signup-login">
+            Already have an account?
+            <a href="{% url 'login' %}">Sign in</a>
+        </p>
+
+        <div class="signup-privacy">
+            Your account is managed by the application. Use a strong,
+            unique password and do not share your login credentials.
+        </div>
+    </div>
+</section>
+{% endblock %}

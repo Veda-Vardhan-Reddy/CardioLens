@@ -1,0 +1,272 @@
+
+{% extends "heart_app/base.html" %}
+
+{% block title %}Split Dataset | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .split-wrap { max-width:1120px; margin:0 auto; }
+    .page-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; flex-wrap:wrap; margin-bottom:26px; }
+    .eyebrow { color:#2563eb; font-size:.76rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; margin-bottom:8px; }
+    .page-heading h1 { margin:0; color:#13233f; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-.04em; }
+    .page-heading p { margin:9px 0 0; color:#64748b; max-width:720px; line-height:1.65; }
+    .step-chip { display:inline-flex; align-items:center; gap:8px; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; padding:9px 13px; border-radius:999px; font-size:.82rem; font-weight:750; white-space:nowrap; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr); gap:22px; align-items:start; }
+    .panel { background:#fff; border:1px solid #e6edf5; border-radius:20px; box-shadow:0 12px 32px rgba(15,23,42,.045); overflow:hidden; }
+    .panel-head { padding:22px 24px; border-bottom:1px solid #edf2f7; display:flex; align-items:center; gap:14px; }
+    .panel-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:#eff6ff; color:#2563eb; font-size:1.25rem; flex-shrink:0; }
+    .panel-head h2 { margin:0; font-size:1.08rem; color:#172554; }
+    .panel-head p { margin:5px 0 0; font-size:.88rem; color:#64748b; line-height:1.5; }
+    .panel-body { padding:24px; }
+    .field-label { display:block; color:#334155; font-weight:750; font-size:.9rem; margin-bottom:9px; }
+    .select-wrap { position:relative; }
+    .select-wrap select { appearance:none; width:100%; padding:13px 42px 13px 14px; border:1px solid #dbe4ef; border-radius:11px; background:#fff; color:#172554; font:inherit; outline:none; }
+    .select-wrap select:focus { border-color:#60a5fa; box-shadow:0 0 0 3px rgba(59,130,246,.13); }
+    .select-arrow { position:absolute; right:15px; top:50%; transform:translateY(-50%); pointer-events:none; color:#64748b; }
+    .help { color:#64748b; font-size:.82rem; line-height:1.55; margin:8px 0 0; }
+    .ratio-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; margin-top:18px; }
+    .ratio-card { border:1px solid #e2e8f0; background:#f8fafc; border-radius:13px; padding:14px 12px; }
+    .ratio-card strong { display:block; color:#172554; font-size:1.2rem; margin-bottom:5px; }
+    .ratio-card span { color:#64748b; font-size:.78rem; }
+    .action-row { display:flex; flex-wrap:wrap; gap:11px; margin-top:23px; }
+    .btn-primary,.btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; padding:12px 17px; font:inherit; font-weight:750; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+    .btn-primary { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; box-shadow:0 7px 16px rgba(37,99,235,.2); }
+    .btn-secondary { background:#fff; border-color:#dbe4ef; color:#334155; }
+    .btn-primary:hover,.btn-secondary:hover { transform:translateY(-1px); }
+    .btn-primary:disabled { opacity:.7; cursor:wait; transform:none; }
+    .notice,.success,.warning,.error { margin-top:16px; padding:14px 16px; border-radius:12px; font-size:.87rem; line-height:1.55; }
+    .notice { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+    .success { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+    .warning { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
+    .error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+    .result-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; margin-top:20px; }
+    .result-card { border:1px solid #e2e8f0; background:#f8fafc; border-radius:13px; padding:16px; }
+    .result-card span { display:block; color:#64748b; font-size:.8rem; margin-bottom:8px; }
+    .result-card strong { color:#172554; font-size:1.45rem; overflow-wrap:anywhere; }
+    .result-card small { display:block; margin-top:5px; color:#64748b; }
+    .class-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; margin-top:12px; }
+    .class-card { padding:14px; border:1px solid #e2e8f0; border-radius:12px; }
+    .class-card strong { display:block; color:#172554; font-size:1.1rem; }
+    .class-card span { display:block; margin-top:5px; color:#64748b; font-size:.8rem; }
+    .workflow { display:grid; gap:14px; }
+    .workflow-step { display:flex; gap:12px; align-items:flex-start; }
+    .step-num { flex:0 0 30px; height:30px; display:grid; place-items:center; border-radius:10px; background:#eff6ff; color:#1d4ed8; font-weight:800; font-size:.82rem; }
+    .workflow-step strong { display:block; color:#1e293b; font-size:.9rem; margin:1px 0 3px; }
+    .workflow-step span { display:block; color:#64748b; font-size:.83rem; line-height:1.5; }
+    .split-visual { margin-top:22px; }
+    .split-bar { display:flex; overflow:hidden; height:13px; border-radius:999px; background:#e2e8f0; margin:11px 0 9px; }
+    .train-part { width:80%; background:linear-gradient(90deg,#2563eb,#60a5fa); transition:width .2s ease; }
+    .test-part { width:20%; background:#14b8a6; transition:width .2s ease; }
+    .legend { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.8rem; color:#64748b; }
+    .legend span { display:flex; align-items:center; gap:7px; }
+    .legend i { display:inline-block; width:8px; height:8px; border-radius:50%; background:#2563eb; }
+    .legend .test-dot { background:#14b8a6; }
+    @media(max-width:800px){.layout{grid-template-columns:1fr}.panel-head{padding:19px}.panel-body{padding:19px}}
+    @media(max-width:520px){.ratio-grid,.result-grid{grid-template-columns:1fr}.action-row>*{width:100%}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="split-wrap">
+    <header class="page-heading">
+        <div>
+            <div class="eyebrow">Model preparation · Step 03</div>
+            <h1>Split your dataset</h1>
+            <p>Choose a training/testing ratio and inspect the resulting record counts before proceeding to model training.</p>
+        </div>
+        <div class="step-chip"><span>●</span> Train / test configuration</div>
+    </header>
+
+    {% if error %}
+        <div class="error" role="alert">
+            <strong>Split failed:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    {% if message %}
+        <div class="notice" role="status">{{ message }}</div>
+    {% endif %}
+
+    {% if summary %}
+        <div class="success" role="status">
+            <strong>Dataset split calculated successfully.</strong>
+            The summary below reflects the selected ratio.
+        </div>
+
+        <div class="result-grid">
+            <div class="result-card">
+                <span>Total records</span>
+                <strong>{{ summary.total }}</strong>
+                <small>Rows in the dataset</small>
+            </div>
+            <div class="result-card">
+                <span>Training records</span>
+                <strong>{{ summary.train }}</strong>
+                <small>{{ summary.train_percent }}% of the dataset</small>
+            </div>
+            <div class="result-card">
+                <span>Testing records</span>
+                <strong>{{ summary.test }}</strong>
+                <small>{{ summary.test_percent }}% of the dataset</small>
+            </div>
+        </div>
+
+        <div class="class-grid">
+            <div class="class-card">
+                <strong>Training class 0: {{ summary.train_class_0 }}</strong>
+                <span>Training records labelled 0</span>
+            </div>
+            <div class="class-card">
+                <strong>Training class 1: {{ summary.train_class_1 }}</strong>
+                <span>Training records labelled 1</span>
+            </div>
+            <div class="class-card">
+                <strong>Testing class 0: {{ summary.test_class_0 }}</strong>
+                <span>Testing records labelled 0</span>
+            </div>
+            <div class="class-card">
+                <strong>Testing class 1: {{ summary.test_class_1 }}</strong>
+                <span>Testing records labelled 1</span>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="layout" style="margin-top:22px;">
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">⇄</div>
+                <div>
+                    <h2>Split configuration</h2>
+                    <p>Choose the percentage of records reserved for testing.</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <form method="post" action="{% url 'split_dataset' %}" id="splitForm">
+                    {% csrf_token %}
+                    <label class="field-label" for="test_size">Training and testing ratio</label>
+                    <div class="select-wrap">
+                        <select name="test_size" id="test_size">
+                            <option value="0.20" {% if summary.test_size == 0.20 %}selected{% endif %}>80% training · 20% testing (recommended)</option>
+                            <option value="0.25" {% if summary.test_size == 0.25 %}selected{% endif %}>75% training · 25% testing</option>
+                            <option value="0.30" {% if summary.test_size == 0.30 %}selected{% endif %}>70% training · 30% testing</option>
+                        </select>
+                        <span class="select-arrow" aria-hidden="true">⌄</span>
+                    </div>
+                    <p class="help">The selected ratio will be used when you click Create data split.</p>
+
+                    <div class="ratio-grid">
+                        <div class="ratio-card">
+                            <strong id="trainPercent">{{ summary.train_percent|default:"80" }}%</strong>
+                            <span>Training set</span>
+                        </div>
+                        <div class="ratio-card">
+                            <strong id="testPercent">{{ summary.test_percent|default:"20" }}%</strong>
+                            <span>Testing set</span>
+                        </div>
+                        <div class="ratio-card">
+                            <strong>13</strong>
+                            <span>Input features</span>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-primary" type="submit" id="splitButton">
+                            Create data split <span aria-hidden="true">→</span>
+                        </button>
+                        <a class="btn-secondary" href="{% url 'preprocess' %}">Back to preprocessing</a>
+                    </div>
+                </form>
+
+                <div class="notice">
+                    <strong>Recommended:</strong> use a fixed random seed and stratify by target label when appropriate. This helps preserve class proportions and makes results reproducible.
+                </div>
+                <div class="warning">
+                    Keep the test set separate until evaluation. Using test data for model selection or fitting preprocessing steps can cause data leakage.
+                </div>
+            </div>
+        </section>
+
+        <aside class="panel">
+            <div class="panel-head">
+                <div class="panel-icon">▥</div>
+                <div>
+                    <h2>How the split works</h2>
+                    <p>A visual guide to the selected training/testing configuration.</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="split-visual">
+                    <div class="split-bar" role="img" aria-label="Training and testing data proportion">
+                        <div class="train-part" id="trainBar"></div>
+                        <div class="test-part" id="testBar"></div>
+                    </div>
+                    <div class="legend">
+                        <span><i></i><span id="trainLegend">{{ summary.train_percent|default:"80" }}% training data</span></span>
+                        <span><i class="test-dot"></i><span id="testLegend">{{ summary.test_percent|default:"20" }}% testing data</span></span>
+                    </div>
+                </div>
+
+                <div class="workflow" style="margin-top:25px;">
+                    <div class="workflow-step">
+                        <div class="step-num">1</div>
+                        <div><strong>Training set</strong><span>Used by algorithms to learn patterns from the input features.</span></div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-num">2</div>
+                        <div><strong>Testing set</strong><span>Held aside to estimate model performance on records not used for training.</span></div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-num">3</div>
+                        <div><strong>Train and compare</strong><span>Proceed to training after confirming your configuration.</span></div>
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <a class="btn-primary" href="{% url 'train_models' %}">Go to model training</a>
+                    <a class="btn-secondary" href="{% url 'dashboard' %}">Dashboard</a>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+(function () {
+    const select = document.getElementById("test_size");
+    const trainPercent = document.getElementById("trainPercent");
+    const testPercent = document.getElementById("testPercent");
+    const trainBar = document.getElementById("trainBar");
+    const testBar = document.getElementById("testBar");
+    const trainLegend = document.getElementById("trainLegend");
+    const testLegend = document.getElementById("testLegend");
+    const form = document.getElementById("splitForm");
+    const button = document.getElementById("splitButton");
+
+    function updateRatio() {
+        if (!select) return;
+
+        const test = Math.round(parseFloat(select.value) * 100);
+        const train = 100 - test;
+
+        if (trainPercent) trainPercent.textContent = train + "%";
+        if (testPercent) testPercent.textContent = test + "%";
+        if (trainBar) trainBar.style.width = train + "%";
+        if (testBar) testBar.style.width = test + "%";
+        if (trainLegend) trainLegend.textContent = train + "% training data";
+        if (testLegend) testLegend.textContent = test + "% testing data";
+    }
+
+    if (select) {
+        select.addEventListener("change", updateRatio);
+        updateRatio();
+    }
+
+    if (form && button) {
+        form.addEventListener("submit", function () {
+            button.disabled = true;
+            button.textContent = "Creating split...";
+        });
+    }
+})();
+</script>
+{% endblock %}

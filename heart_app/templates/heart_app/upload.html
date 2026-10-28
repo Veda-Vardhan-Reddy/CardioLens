@@ -1,0 +1,409 @@
+{% extends "heart_app/base.html" %}
+
+{% block title %}Upload Dataset | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .upload-page { display: grid; gap: 24px; max-width: 1120px; margin: 0 auto; }
+    .upload-hero {
+        padding: clamp(26px, 4vw, 42px);
+        border-radius: 20px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 90% 5%, rgba(106, 198, 243, .28), transparent 30%),
+            linear-gradient(125deg, #102b49 0%, #145b91 62%, #197bb5 100%);
+        box-shadow: 0 16px 38px rgba(20, 65, 105, .13);
+    }
+    .upload-eyebrow {
+        display: inline-block;
+        padding: 7px 11px;
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 999px;
+        background: rgba(255,255,255,.08);
+        color: #d9f0ff;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+    }
+    .upload-hero h1 {
+        margin: 18px 0 10px;
+        color: #fff;
+        font-size: clamp(30px, 4vw, 42px);
+        line-height: 1.12;
+        letter-spacing: -1.2px;
+    }
+    .upload-hero p {
+        max-width: 700px;
+        margin: 0;
+        color: #d5e7f5;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+    .upload-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+        gap: 20px;
+        align-items: start;
+    }
+    .upload-card {
+        padding: 26px;
+        border: 1px solid #e4eaf1;
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 7px 22px rgba(20,43,77,.045);
+    }
+    .upload-card h2 {
+        margin: 0;
+        color: #172b4d;
+        font-size: 19px;
+        letter-spacing: -.35px;
+    }
+    .upload-card-intro {
+        margin: 8px 0 22px;
+        color: #718096;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+    .upload-dropzone {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 220px;
+        padding: 24px;
+        border: 1.5px dashed #b7cfe4;
+        border-radius: 15px;
+        background: #f7fbff;
+        text-align: center;
+        transition: border-color .18s, background .18s;
+    }
+    .upload-dropzone:focus-within {
+        border-color: #1769aa;
+        background: #f0f8ff;
+    }
+    .upload-file-icon {
+        display: grid;
+        place-items: center;
+        width: 58px;
+        height: 58px;
+        margin-bottom: 14px;
+        border-radius: 17px;
+        background: #e5f2fc;
+        color: #1769aa;
+        font-size: 28px;
+        font-weight: 800;
+    }
+    .upload-dropzone strong { color: #263d59; font-size: 14px; }
+    .upload-dropzone p {
+        margin: 7px 0 15px;
+        color: #7b899b;
+        font-size: 12px;
+    }
+    .upload-file-input {
+        display: block;
+        width: 100%;
+        max-width: 360px;
+        color: #52637a;
+        font-size: 12px;
+    }
+    .upload-file-input::file-selector-button {
+        margin-right: 10px;
+        padding: 9px 12px;
+        border: 1px solid #d4e0eb;
+        border-radius: 8px;
+        background: #fff;
+        color: #1769aa;
+        font: inherit;
+        font-weight: 750;
+        cursor: pointer;
+    }
+    .upload-file-name {
+        min-height: 18px;
+        margin-top: 12px;
+        color: #1769aa;
+        font-size: 11px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+    .upload-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 47px;
+        margin-top: 18px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(100deg, #1769aa, #125487);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(23,105,170,.18);
+        transition: transform .18s, box-shadow .18s;
+    }
+    .upload-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 11px 23px rgba(23,105,170,.23);
+    }
+    .upload-error, .upload-success {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+    .upload-error {
+        border: 1px solid #f2c7c3;
+        background: #fff5f4;
+        color: #a1261d;
+    }
+    .upload-success {
+        border: 1px solid #bbf7d0;
+        background: #f0fdf4;
+        color: #166534;
+    }
+    .upload-info-list { display: grid; gap: 14px; margin-top: 18px; }
+    .upload-info-item { display: flex; align-items: flex-start; gap: 11px; }
+    .upload-info-mark {
+        display: grid;
+        place-items: center;
+        flex: 0 0 28px;
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        background: #edf5fc;
+        color: #1769aa;
+        font-size: 13px;
+        font-weight: 800;
+    }
+    .upload-info-item strong { display: block; color: #30445d; font-size: 12px; }
+    .upload-info-item span { display: block; margin-top: 3px; color: #718096; font-size: 11px; line-height: 1.6; }
+    .upload-columns {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid #e4eaf1;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+    .upload-columns h3 {
+        margin: 0 0 8px;
+        color: #30445d;
+        font-size: 12px;
+    }
+    .upload-columns p {
+        margin: 0;
+        color: #63748a;
+        font-size: 11px;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+    }
+    .upload-columns code {
+        padding: 2px 5px;
+        border-radius: 5px;
+        background: #eaf0f6;
+        color: #254c70;
+        font-size: 10px;
+    }
+    .upload-note {
+        padding: 14px 16px;
+        border: 1px solid #f0d7a6;
+        border-radius: 12px;
+        background: #fff9e9;
+        color: #7c5a18;
+        font-size: 11px;
+        line-height: 1.75;
+    }
+    .upload-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .upload-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 9px 13px;
+        border: 1px solid #d8e1eb;
+        border-radius: 9px;
+        background: #fff;
+        color: #1769aa;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 800;
+    }
+    .upload-link:hover { background: #f3f8fc; }
+    @media (max-width: 800px) {
+        .upload-layout { grid-template-columns: 1fr; }
+        .upload-card { padding: 22px; }
+    }
+    @media (max-width: 480px) {
+        .upload-hero { padding: 25px 21px; }
+        .upload-card { padding: 18px; }
+        .upload-dropzone { padding: 20px 14px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-page">
+
+    <section class="upload-hero">
+        <span class="upload-eyebrow">Step 01 · Dataset preparation</span>
+        <h1>Upload your heart disease dataset</h1>
+        <p>
+            Start the CardioLens workflow by importing a labeled CSV dataset.
+            The application checks the required columns and prepares the file
+            for inspection, splitting, model training, and evaluation.
+        </p>
+    </section>
+
+    <div class="upload-layout">
+        <section class="upload-card">
+            <h2>Choose a dataset file</h2>
+            <p class="upload-card-intro">
+                Select a CSV file from your computer. The dataset must include
+                the 13 supported input features and a target label.
+            </p>
+
+            {% if success %}
+                <div class="upload-success" role="status">
+                    <strong>Upload successful:</strong> {{ success }}
+                </div>
+            {% elif messages %}
+                {% for message in messages %}
+                    <div class="upload-success" role="status">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if error %}
+                <div class="upload-error" role="alert">
+                    <strong>Upload failed:</strong> {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'upload_dataset' %}" enctype="multipart/form-data" id="datasetUploadForm">
+                {% csrf_token %}
+
+                <label class="upload-dropzone" for="datasetFile">
+                    <span class="upload-file-icon" aria-hidden="true">↑</span>
+                    <strong>Choose your CSV dataset</strong>
+                    <p>CSV format only · Use a labeled dataset for training</p>
+                    <input
+                        class="upload-file-input"
+                        type="file"
+                        id="datasetFile"
+                        name="dataset"
+                        accept=".csv,text/csv"
+                        required
+                    >
+                    <span class="upload-file-name" id="selectedFileName">No file selected</span>
+                </label>
+
+                <button class="upload-submit" type="submit" id="uploadSubmitButton">
+                    Upload Dataset &nbsp; →
+                </button>
+            </form>
+
+            <div class="upload-actions">
+                <a class="upload-link" href="{% url 'preprocess' %}">View Preprocessing</a>
+                <a class="upload-link" href="{% url 'dashboard' %}">Back to Dashboard</a>
+            </div>
+        </section>
+
+        <aside class="upload-card">
+            <h2>Dataset requirements</h2>
+            <p class="upload-card-intro">
+                Check the structure before uploading to avoid column-mismatch errors.
+            </p>
+
+            <div class="upload-info-list">
+                <div class="upload-info-item">
+                    <span class="upload-info-mark">✓</span>
+                    <div>
+                        <strong>CSV file with target labels</strong>
+                        <span>Training data must contain a target column named <code>num</code> or <code>target</code>.</span>
+                    </div>
+                </div>
+
+                <div class="upload-info-item">
+                    <span class="upload-info-mark">13</span>
+                    <div>
+                        <strong>Required input features</strong>
+                        <span>All 13 supported feature columns must be present. Column names are normalized to lowercase.</span>
+                    </div>
+                </div>
+
+                <div class="upload-info-item">
+                    <span class="upload-info-mark">01</span>
+                    <div>
+                        <strong>Binary target conversion</strong>
+                        <span>Target values greater than zero are treated as class 1; zero is treated as class 0.</span>
+                    </div>
+                </div>
+
+                <div class="upload-info-item">
+                    <span class="upload-info-mark">↗</span>
+                    <div>
+                        <strong>Next step</strong>
+                        <span>After a successful upload, this page stays open and displays the upload confirmation. You can then open Preprocess to inspect the dataset.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-columns">
+                <h3>Required feature columns</h3>
+                <p>
+                    <code>age</code> <code>sex</code> <code>cp</code>
+                    <code>trestbps</code> <code>chol</code> <code>fbs</code>
+                    <code>restecg</code> <code>thalach</code> <code>exang</code>
+                    <code>oldpeak</code> <code>slope</code> <code>ca</code>
+                    <code>thal</code>
+                </p>
+            </div>
+        </aside>
+    </div>
+
+    <div class="upload-note">
+        <strong>Research note:</strong> Missing feature values may be retained for
+        later imputation by the model pipeline, but target labels must be present.
+        Check for duplicate records and possible data leakage before interpreting
+        evaluation scores. This application is a research prototype, not a medical device.
+    </div>
+
+</div>
+
+<script>
+    (function () {
+        const input = document.getElementById("datasetFile");
+        const filename = document.getElementById("selectedFileName");
+        const form = document.getElementById("datasetUploadForm");
+        const submitButton = document.getElementById("uploadSubmitButton");
+
+        if (input && filename) {
+            input.addEventListener("change", function () {
+                filename.textContent = this.files && this.files.length
+                    ? this.files[0].name
+                    : "No file selected";
+            });
+        }
+
+        if (form && input) {
+            form.addEventListener("submit", function (event) {
+                if (!input.files || !input.files.length) {
+                    event.preventDefault();
+                    input.focus();
+                    filename.textContent = "Please select a CSV file first.";
+                } else if (!input.files[0].name.toLowerCase().endsWith(".csv")) {
+                    event.preventDefault();
+                    filename.textContent = "Only CSV files are supported.";
+                } else if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = "Uploading...";
+                }
+            });
+        }
+    })();
+</script>
+{% endblock %}

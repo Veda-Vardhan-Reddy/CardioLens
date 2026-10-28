@@ -1,0 +1,538 @@
+{% extends "heart_app/base.html" %}
+
+{% block title %}Dashboard | CardioLens{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dashboard-page { display: grid; gap: 24px; }
+    .dash-hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(230px, .65fr);
+        gap: 28px;
+        align-items: center;
+        overflow: hidden;
+        padding: clamp(28px, 5vw, 54px);
+        border-radius: 22px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 85% 20%, rgba(95, 190, 240, .28), transparent 28%),
+            linear-gradient(125deg, #102b49 0%, #145b91 60%, #197bb5 100%);
+        box-shadow: 0 18px 45px rgba(20, 65, 105, .15);
+    }
+    .dash-hero::after {
+        content: "";
+        position: absolute;
+        width: 290px;
+        height: 290px;
+        right: -100px;
+        bottom: -175px;
+        border: 1px solid rgba(255,255,255,.16);
+        border-radius: 50%;
+        box-shadow: 0 0 0 30px rgba(255,255,255,.035), 0 0 0 60px rgba(255,255,255,.025);
+        pointer-events: none;
+    }
+    .dash-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 11px;
+        border: 1px solid rgba(255,255,255,.24);
+        border-radius: 999px;
+        background: rgba(255,255,255,.09);
+        color: #d9f0ff;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+    .dash-hero h1 {
+        max-width: 650px;
+        margin: 20px 0 15px;
+        color: #fff;
+        font-size: clamp(32px, 4.5vw, 52px);
+        line-height: 1.08;
+        letter-spacing: -1.8px;
+    }
+    .dash-hero h1 span { color: #8bd7ff; }
+    .dash-hero p {
+        max-width: 620px;
+        margin: 0;
+        color: #d5e7f5;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+    .dash-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 11px;
+        margin-top: 27px;
+    }
+    .dash-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 44px;
+        padding: 11px 17px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: #fff;
+        color: #145b91;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 800;
+        transition: transform .18s, box-shadow .18s, background .18s;
+    }
+    .dash-button:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.13); }
+    .dash-button.secondary {
+        border-color: rgba(255,255,255,.35);
+        background: rgba(255,255,255,.08);
+        color: #fff;
+    }
+    .dash-visual {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 240px;
+    }
+    .dash-heart-ring {
+        display: grid;
+        place-items: center;
+        width: 158px;
+        height: 158px;
+        border: 1px solid rgba(255,255,255,.35);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,.17), rgba(255,255,255,.035));
+        box-shadow: 0 0 0 15px rgba(255,255,255,.045), 0 0 0 30px rgba(255,255,255,.025);
+        font-size: 72px;
+        color: #fff;
+    }
+    .dash-visual-label {
+        margin-top: 27px;
+        padding: 10px 15px;
+        border: 1px solid rgba(255,255,255,.23);
+        border-radius: 12px;
+        background: rgba(7,32,56,.25);
+        color: #e4f3ff;
+        text-align: center;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+    .dash-section-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 4px 0 0;
+    }
+    .dash-section-heading h2 {
+        margin: 0;
+        color: #172b4d;
+        font-size: 21px;
+        letter-spacing: -.5px;
+    }
+    .dash-section-heading p {
+        margin: 5px 0 0;
+        color: #718096;
+        font-size: 12px;
+    }
+    .dash-steps {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .dash-step {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 166px;
+        padding: 20px;
+        border: 1px solid #e4eaf1;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 5px 18px rgba(20,43,77,.035);
+        text-decoration: none;
+        transition: transform .18s, box-shadow .18s, border-color .18s;
+    }
+    .dash-step:hover {
+        transform: translateY(-3px);
+        border-color: #bfd9ee;
+        box-shadow: 0 12px 28px rgba(20,43,77,.08);
+    }
+    .dash-step-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .dash-step-icon {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #edf5fc;
+        color: #1769aa;
+        font-size: 19px;
+        font-weight: 800;
+    }
+    .dash-step-number {
+        color: #a1adbc;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .8px;
+    }
+    .dash-step h3 {
+        margin: 0 0 7px;
+        color: #203550;
+        font-size: 14px;
+    }
+    .dash-step p {
+        flex: 1;
+        margin: 0;
+        color: #718096;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+    .dash-step-link {
+        display: inline-block;
+        margin-top: 14px;
+        color: #1769aa;
+        font-size: 11px;
+        font-weight: 800;
+    }
+    .dash-overview {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .dash-overview-card {
+        padding: 22px;
+        border: 1px solid #e4eaf1;
+        border-radius: 16px;
+        background: #fff;
+    }
+    .dash-overview-card .overline {
+        margin: 0 0 9px;
+        color: #7a899b;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .dash-overview-card h3 {
+        margin: 0 0 8px;
+        color: #203550;
+        font-size: 16px;
+    }
+    .dash-overview-card p {
+        margin: 0;
+        color: #718096;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+    .dash-overview-card a {
+        display: inline-block;
+        margin-top: 15px;
+        color: #1769aa;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 800;
+    }
+    .dash-overview-card a:hover { text-decoration: underline; }
+    .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .dash-stat {
+        padding: 18px 20px;
+        border: 1px solid #e4eaf1;
+        border-radius: 15px;
+        background: #fff;
+    }
+    .dash-stat-label { color: #718096; font-size: 11px; font-weight: 700; }
+    .dash-stat-value { margin-top: 8px; color: #172b4d; font-size: 25px; font-weight: 800; letter-spacing: -.7px; }
+    .dash-stat-foot { margin-top: 4px; color: #8a97a8; font-size: 10px; }
+    .dash-alert {
+        padding: 14px 16px;
+        border: 1px solid #f0d7a6;
+        border-radius: 12px;
+        background: #fff9e9;
+        color: #7c5a18;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+    .dash-results {
+        overflow-x: auto;
+        border: 1px solid #e4eaf1;
+        border-radius: 15px;
+        background: #fff;
+    }
+    .dash-results table { width: 100%; border-collapse: collapse; min-width: 580px; }
+    .dash-results th, .dash-results td { padding: 13px 16px; border-bottom: 1px solid #edf0f5; text-align: left; font-size: 12px; }
+    .dash-results th { background: #f8fafc; color: #63748a; font-size: 10px; text-transform: uppercase; letter-spacing: .65px; }
+    .dash-results tr:last-child td { border-bottom: 0; }
+    .dash-results td { color: #40536b; }
+    .dash-empty { padding: 24px; color: #718096; font-size: 13px; text-align: center; }
+    @media (max-width: 1000px) {
+        .dash-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .dash-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .dash-hero { grid-template-columns: minmax(0, 1fr) 210px; }
+        .dash-heart-ring { width: 130px; height: 130px; font-size: 60px; }
+    }
+    @media (max-width: 720px) {
+        .dash-hero { grid-template-columns: 1fr; padding: 28px 24px; }
+        .dash-visual { min-height: 0; padding: 10px 0 5px; }
+        .dash-heart-ring { width: 100px; height: 100px; font-size: 46px; }
+        .dash-visual-label { margin-top: 20px; }
+        .dash-overview { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+        .dash-steps, .dash-stats { grid-template-columns: 1fr; }
+        .dash-step { min-height: 145px; }
+        .dash-hero h1 { font-size: 34px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+    <section class="dash-hero">
+        <div>
+            <span class="dash-eyebrow">● &nbsp; Machine Learning · Decision Support</span>
+            <h1>Heart disease research,<br><span>made clearer.</span></h1>
+            <p>
+                Welcome to CardioLens, a research workspace for exploring a
+                structured heart disease dataset, training classification
+                models, comparing evaluation metrics, and testing predictions.
+            </p>
+            <div class="dash-actions">
+                <a class="dash-button" href="{% url 'upload_dataset' %}">Start Workflow &nbsp; →</a>
+                <a class="dash-button secondary" href="{% url 'comparison' %}">View Model Results</a>
+            </div>
+        </div>
+
+        <div class="dash-visual" aria-hidden="true">
+            <div class="dash-heart-ring">♥</div>
+            <div class="dash-visual-label">
+                <strong>Explore · Train · Evaluate</strong><br>
+                Evidence-led model experimentation
+            </div>
+        </div>
+    </section>
+
+    {% if error %}
+        <div class="dash-alert">
+            <strong>Dataset notice:</strong> {{ error }}
+            <br>Upload a compatible dataset to begin or continue the workflow.
+        </div>
+    {% endif %}
+
+    {% if summary %}
+        <section class="dash-stats" aria-label="Dataset summary">
+            <article class="dash-stat">
+                <div class="dash-stat-label">Total records</div>
+                <div class="dash-stat-value">{{ summary.total_records }}</div>
+                <div class="dash-stat-foot">Rows currently loaded</div>
+            </article>
+            <article class="dash-stat">
+                <div class="dash-stat-label">Input features</div>
+                <div class="dash-stat-value">{{ summary.total_features }}</div>
+                <div class="dash-stat-foot">Features used by the pipeline</div>
+            </article>
+            <article class="dash-stat">
+                <div class="dash-stat-label">Missing feature values</div>
+                <div class="dash-stat-value">{{ summary.missing_values }}</div>
+                <div class="dash-stat-foot">Review before model training</div>
+            </article>
+            <article class="dash-stat">
+                <div class="dash-stat-label">Duplicate rows</div>
+                <div class="dash-stat-value">{{ summary.duplicate_rows }}</div>
+                <div class="dash-stat-foot">Duplicates may affect evaluation</div>
+            </article>
+        </section>
+    {% endif %}
+
+    <section>
+        <div class="dash-section-heading">
+            <div>
+                <h2>Your project workflow</h2>
+                <p>Follow each stage in order, from dataset preparation to prediction.</p>
+            </div>
+        </div>
+
+        <div class="dash-steps">
+            <a class="dash-step" href="{% url 'upload_dataset' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">↑</span>
+                    <span class="dash-step-number">STEP 01</span>
+                </div>
+                <h3>Upload Dataset</h3>
+                <p>Import a compatible CSV containing the 13 input features and target column.</p>
+                <span class="dash-step-link">Open upload →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'preprocess' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">≋</span>
+                    <span class="dash-step-number">STEP 02</span>
+                </div>
+                <h3>Preprocess Data</h3>
+                <p>Inspect columns, missing values, duplicates and target-class counts.</p>
+                <span class="dash-step-link">Inspect dataset →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'split_dataset' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">⇄</span>
+                    <span class="dash-step-number">STEP 03</span>
+                </div>
+                <h3>Split Dataset</h3>
+                <p>Review the stratified training and testing split used for evaluation.</p>
+                <span class="dash-step-link">View split →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'train_models' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">⚙</span>
+                    <span class="dash-step-number">STEP 04</span>
+                </div>
+                <h3>Train Models</h3>
+                <p>Run eight classification pipelines and save the proposed model.</p>
+                <span class="dash-step-link">Train classifiers →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'comparison' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">▥</span>
+                    <span class="dash-step-number">STEP 05</span>
+                </div>
+                <h3>Graphs &amp; Evaluation</h3>
+                <p>Compare accuracy, sensitivity, specificity, F1 and ROC-AUC.</p>
+                <span class="dash-step-link">View evaluation →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'predict' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">♥</span>
+                    <span class="dash-step-number">STEP 06A</span>
+                </div>
+                <h3>Manual Prediction</h3>
+                <p>Enter one record's feature values and view the model output.</p>
+                <span class="dash-step-link">Enter features →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'csv_predict' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">▤</span>
+                    <span class="dash-step-number">STEP 06B</span>
+                </div>
+                <h3>CSV Prediction</h3>
+                <p>Upload a testdata CSV to predict multiple records and download results.</p>
+                <span class="dash-step-link">Upload test CSV →</span>
+            </a>
+
+            <a class="dash-step" href="{% url 'about' %}">
+                <div class="dash-step-top">
+                    <span class="dash-step-icon">i</span>
+                    <span class="dash-step-number">REFERENCE</span>
+                </div>
+                <h3>Methodology</h3>
+                <p>Read about the project approach, algorithms and research limitations.</p>
+                <span class="dash-step-link">Read methodology →</span>
+            </a>
+        </div>
+    </section>
+
+    <section>
+        <div class="dash-section-heading">
+            <div>
+                <h2>Research overview</h2>
+                <p>Explore the capabilities available in this application.</p>
+            </div>
+        </div>
+
+        <div class="dash-overview">
+            <article class="dash-overview-card">
+                <p class="overline">01 / Classification</p>
+                <h3>Compare eight ML algorithms</h3>
+                <p>Evaluate Logistic Regression, Random Forest, Gradient Boosting, SVM, KNN, Decision Tree, LDA and Random Forest with feature selection.</p>
+                <a href="{% url 'comparison' %}">Explore comparison →</a>
+            </article>
+
+            <article class="dash-overview-card">
+                <p class="overline">02 / Prediction</p>
+                <h3>Two prediction workflows</h3>
+                <p>Test one feature record manually or submit a CSV containing multiple records for batch prediction.</p>
+                <a href="{% url 'predict' %}">Open manual prediction →</a>
+            </article>
+
+            <article class="dash-overview-card">
+                <p class="overline">03 / Transparency</p>
+                <h3>Interpret results carefully</h3>
+                <p>Review test metrics and dataset quality. Duplicate records can make performance appear stronger than it generalizes.</p>
+                <a href="{% url 'about' %}">Read methodology →</a>
+            </article>
+        </div>
+    </section>
+
+    {% if rows %}
+        <section>
+            <div class="dash-section-heading">
+                <div>
+                    <h2>Latest saved model comparison</h2>
+                    <p>Metrics from the existing comparison report.</p>
+                </div>
+                <a class="dash-step-link" href="{% url 'comparison' %}">Full evaluation →</a>
+            </div>
+
+            <div class="dash-results">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>CV Accuracy</th>
+                            <th>Test Accuracy</th>
+                            <th>Sensitivity</th>
+                            <th>Specificity</th>
+                            <th>ROC-AUC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                            <tr>
+                                <td><strong>{{ row.model }}</strong></td>
+                                <td>{% if row.cv_accuracy_mean != "" %}{{ row.cv_accuracy_mean|floatformat:3 }}{% else %}—{% endif %}</td>
+                                <td>{% if row.test_accuracy != "" %}{{ row.test_accuracy|floatformat:3 }}{% else %}—{% endif %}</td>
+                                <td>{% if row.sensitivity != "" %}{{ row.sensitivity|floatformat:3 }}{% else %}—{% endif %}</td>
+                                <td>{% if row.specificity != "" %}{{ row.specificity|floatformat:3 }}{% else %}—{% endif %}</td>
+                                <td>{% if row.roc_auc != "" %}{{ row.roc_auc|floatformat:3 }}{% else %}—{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% else %}
+        <section class="dash-alert">
+            <strong>No model comparison report found yet.</strong>
+            Upload and prepare your dataset, then open Train Models to generate the evaluation report.
+        </section>
+    {% endif %}
+
+    <aside class="dash-alert">
+        <strong>Research and safety notice:</strong>
+        CardioLens is an educational machine-learning prototype, not a medical device.
+        Its predictions are not diagnoses and must not be used alone for treatment decisions.
+        Consult a qualified healthcare professional for medical concerns.
+    </aside>
+
+</div>
+{% endblock %}
